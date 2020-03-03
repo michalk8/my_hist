@@ -1,3 +1,4 @@
+from typing import Sequence
 from abc import abstractmethod
 import boost_histogram as bha
 
@@ -5,11 +6,9 @@ import boost_histogram as bha
 class BaseHist(bha.Histogram):
 
     def __init__(self,
-                 x_axis: bha.axis,
-                 y_axis: bha.axis,
-                 z_axis: bha.axis,
+                 *axes: Sequence[bha.axis],
                  **kwargs):
-        super().__init__(x_axis, y_axis, z_axis, **kwargs)
+        super().__init__(*axes, **kwargs)
         self._validate_axes()
 
     @abstractmethod
