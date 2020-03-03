@@ -1,4 +1,5 @@
 from collections import defaultdict, Counter
+from inspect import signature, Parameter
 from boost_histogram import axis
 from .core import BaseHist
 
@@ -10,14 +11,24 @@ class NamedHist(BaseHist):
     def __init___(self, *axes: axis, **kwargs):
         super(*axes, **kwargs)
         self._axes_names_to_ixs = defaultdict(lambda: self._sentinel, {ax.name: ix for ix, ax in enumerate(self.axes)})
+        self._fill_params_to_ignore = {k for k, param in signature(self.fill).parameters.items()
+                                       if param.kind != Parameter.KEYWORD_ONLY}
 
     def _validate_axes(self):
         for ix, ax in enumerate(self.axes):
             if ax.name is None:
                 raise ValueError(f'{ix}. axis `{ax}` doesn\'t have a name.')
 
-    def fill(self, *args, weight=None, sample=None):
-        pass
+    def fill(self, **kwargs):
+        args = []
+        for k in list(kwargs.keys()):
+            if k not in self._fill_params_to_ignore:
+                if self._axes_names_to_ixs[k] is self._sentinel:
+                    raise ValueError(f'Invalid axis name `{k}`. Valid options are: `{self._axes_names_to_ixs.keys()}`.')
+                args.append((self._axes_names_to_ixs[k], kwargs.pop(k)))
+
+        args = tuple(v for k, v in sorted(args, key=lambda kv: kv[0]))
+        super().fill(*args, **kwargs)
 
     def __getitem__(self, item):
         if isinstance(item, dict):
