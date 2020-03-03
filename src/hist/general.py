@@ -2,4 +2,6 @@ from .core import BaseHist
 
 
 class Hist(BaseHist):
-    pass
+
+    def _validate_axes(self):
+        pass
