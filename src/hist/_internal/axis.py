@@ -2,7 +2,7 @@ from typing import Optional
 import boost_histogram.axis as bha
 
 
-class NamedAxis(bha):
+class NamedAxis(bha.Axis):
 
     @property
     def name(self):
