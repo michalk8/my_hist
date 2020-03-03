@@ -1,7 +1,19 @@
+from typing import Optional
 import boost_histogram.axis as bha
 
 
-class Regular(bha.Regular):
+class NamedAxis(bha):
+
+    @property
+    def name(self):
+        return self.metadata["name"]
+
+    @name.setter
+    def name(self, value):
+        self.metadata["name"] = value
+
+
+class Regular(bha.Regular, NamedAxis):
     def __init__(
         self,
         bins,
@@ -28,26 +40,39 @@ class Regular(bha.Regular):
             transform=transform,
         )
 
-    @property
-    def name(self):
-        return self.metadata["name"]
 
-    @name.setter
-    def name(self, value):
-        self.metadata["name"] = value
-
-
-class Variable(bha.Variable):
+class Variable(bha.Variable, NamedAxis):
     pass
 
 
-class Integer(bha.Integer):
+class Integer(bha.Integer, NamedAxis):
     pass
 
 
-class IntCategory(bha.IntCategory):
+class Bool(bha.Integer, NamedAxis):
+
+    def __init__(
+        self,
+        *,
+        name: Optional[str] = None,
+        circular: bool = False,
+        growth: bool = False
+    ):
+        metadata = dict(name=name)
+        super().__init__(
+            start=0,
+            stop=2,
+            metadata=metadata,
+            underflow=False,
+            overflow=False,
+            circular=circular,
+            growth=growth
+        )
+
+
+class IntCategory(bha.IntCategory, NamedAxis):
     pass
 
 
-class StrCategory(bha.StrCategory):
+class StrCategory(bha.StrCategory, NamedAxis):
     pass
