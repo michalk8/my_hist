@@ -8,11 +8,12 @@ class NamedHist(BaseHist):
 
     _sentinel = object()
 
-    def __init___(self, *axes: axis, **kwargs):
-        super(*axes, **kwargs)
+    def __init__(self, *axes: axis, **kwargs):
+        super().__init__(*axes, **kwargs)
         self._axes_names_to_ixs = defaultdict(lambda: self._sentinel, {ax.name: ix for ix, ax in enumerate(self.axes)})
         self._fill_params_to_ignore = {k for k, param in signature(self.fill).parameters.items()
                                        if param.kind != Parameter.KEYWORD_ONLY}
+        print(self._fill_params_to_ignore)
 
     def _validate_axes(self):
         for ix, ax in enumerate(self.axes):
