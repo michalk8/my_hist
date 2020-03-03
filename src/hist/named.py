@@ -28,12 +28,17 @@ class NamedHist(BaseHist):
             indices = [(ix if isinstance(ix, int) else self._axes_names_to_ixs[ix]) for ix in item.keys()]
 
             if any((lambda i: i is self._sentinel, indices)):
+                # if any of the names failed to match
                 wrong_names = [k for k in item.keys() if self._axes_names_to_ixs[k] is self._sentinel]
                 raise ValueError(f'Invalid ax name(s): `{", ".join(wrong_names)}`.')
 
             counter = Counter(indices)
             if counter.most_common(1)[0][0] != 1:
-                raise ValueError()
+                # if we have duplicates
+                ixs_to_names = {ix: name for name, ix in self._axes_names_to_ixs}
+                # since dict has unique keys, invalid combination must've come from int/str mixing
+                duplicate_ixs = [(ix, ixs_to_names[ix]) for ix, count in counter.items() if count > 1]
+                raise ValueError(f'Found duplicate indices for following entries: `{duplicate_ixs}`.')
 
             item = dict(zip(indices, item.values()))
 
