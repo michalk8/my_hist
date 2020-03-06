@@ -20,7 +20,9 @@ class NamedHist(BaseHist):
             if ax.name is None:
                 raise ValueError(f'{ix}. axis `{ax}` doesn\'t have a name.')
 
-    def fill(self, **kwargs):
+    def fill(self, *args, **kwargs):
+        if len(args) != 0:
+            raise RuntimeError('Only keyword arguments are supported.')
         args = []
         for k in list(kwargs.keys()):
             if k not in self._fill_params_to_ignore:
@@ -29,20 +31,20 @@ class NamedHist(BaseHist):
                                      f'Valid options are: `{list(self._axes_names_to_ixs.keys())}`.')
                 args.append((self._axes_names_to_ixs[k], kwargs.pop(k)))
 
-        args = tuple(v for k, v in sorted(args, key=lambda kv: kv[0]))
+        args = tuple(v for k, v in sorted(args, key=lambda kv: kv[0]))  # sort by axis indices
         return super().fill(*args, **kwargs)
 
     def __getitem__(self, item):
         if isinstance(item, dict):
             for k in item.keys():
                 if not isinstance(k, (int, str)):
-                    raise ValueError(f'All keys for dictionary-based indexing must be either `int` or `str`, '
-                                     f'found `{type(k).__name__}`.')
+                    raise TypeError(f'All keys for dictionary-based indexing must be either `int` or `str`, '
+                                    f'found `{type(k).__name__}`.')
             indices = [(ix if isinstance(ix, int) else self._axes_names_to_ixs[ix]) for ix in item.keys()]
 
             if any(map(lambda i: i is self._sentinel, indices)):
                 # if any of the names failed to match
-                wrong_names = [k for k in item.keys() if self._axes_names_to_ixs[k] is self._sentinel]
+                wrong_names = [str(k) for k in item.keys() if self._axes_names_to_ixs[k] is self._sentinel]
                 raise ValueError(f'Invalid ax name(s): `{", ".join(wrong_names)}`. ',
                                  f'Valid options are: `{list(self._axes_names_to_ixs.keys())}`.')
 
