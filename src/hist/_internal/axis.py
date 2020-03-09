@@ -3,7 +3,6 @@ import boost_histogram.axis as bha
 
 
 class NamedAxis(bha.Axis):
-
     @property
     def name(self):
         return self.metadata["name"]
@@ -50,7 +49,6 @@ class Integer(bha.Integer, NamedAxis):
 
 
 class Bool(bha.Integer, NamedAxis):
-
     def __init__(
         self,
         *,
@@ -66,7 +64,7 @@ class Bool(bha.Integer, NamedAxis):
             underflow=False,
             overflow=False,
             circular=circular,
-            growth=growth
+            growth=growth,
         )
 
 

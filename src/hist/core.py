@@ -3,10 +3,7 @@ import boost_histogram as bha
 
 
 class BaseHist(bha.Histogram):
-
-    def __init__(self,
-                 *axes: bha.axis,
-                 **kwargs):
+    def __init__(self, *axes: bha.axis, **kwargs):
         super().__init__(*axes, **kwargs)
         self._validate_axes()
 

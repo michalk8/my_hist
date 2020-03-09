@@ -3,56 +3,41 @@ import unittest
 
 
 class NamedHistTestCase(unittest.TestCase):
-
     def test_only_named_axes(self):
         with self.assertRaises(ValueError):
-            h = NamedHist(
-                axis.Regular(10, 0, 1),
-                axis.Regular(10, 0, 1, name="y")
-            )
+            h = NamedHist(axis.Regular(10, 0, 1), axis.Regular(10, 0, 1, name="y"))
 
     def test_only_kwargs_fill(self):
-        h = NamedHist(
-            axis.Regular(10, 0, 1, name="x")
-        )
+        h = NamedHist(axis.Regular(10, 0, 1, name="x"))
         with self.assertRaises(RuntimeError):
             h.fill([0.35, 0.35, 0.45])
 
     def test_wrong_key_type(self):
-        h = NamedHist(
-            axis.Regular(10, 0, 1, name="x")
-        )
+        h = NamedHist(axis.Regular(10, 0, 1, name="x"))
         h.fill(x=[0.35, 0.35, 0.45])
 
         with self.assertRaises(TypeError):
             _ = h[{object: 2}]
 
     def test_invalid_ax_names(self):
-        h = NamedHist(
-            axis.Regular(10, 0, 1, name="x")
-        )
+        h = NamedHist(axis.Regular(10, 0, 1, name="x"))
 
         with self.assertRaises(ValueError):
             h.fill(y=[0.35, 0.35, 0.45])
 
     def test_duplicate_key(self):
-        h = NamedHist(
-            axis.Regular(10, 0, 1, name="x")
-        )
+        h = NamedHist(axis.Regular(10, 0, 1, name="x"))
         h.fill(x=[0.35, 0.35, 0.45])
 
         with self.assertRaises(ValueError):
-            _ = h[{'x': 3, 0: 2}]  # x is the 0th index
+            _ = h[{"x": 3, 0: 2}]  # x is the 0th index
 
     def test_key_not_found(self):
-        h = NamedHist(
-            axis.Regular(10, 0, 1, name="x")
-        )
+        h = NamedHist(axis.Regular(10, 0, 1, name="x"))
         h.fill(x=[0.35, 0.35, 0.45])
 
         with self.assertRaises(ValueError):
-            _ = h[{'y': 3, 0: 2}]
-
+            _ = h[{"y": 3, 0: 2}]
 
     def test_basic_usage(self):
         h = NamedHist(
@@ -66,5 +51,5 @@ class NamedHistTestCase(unittest.TestCase):
         self.assertEqual(h[5], 0)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()
