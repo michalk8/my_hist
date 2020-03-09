@@ -21,12 +21,43 @@ class Hist(BaseHist):
         ylabel: str = "Counts",
         figsize: Tuple[float, float] = (8, 8),
         grid: bool = True,
-        n_steps: Optional[float] = None,
-        n_steps_pull: Optional[float] = None,
+        n_ticks: Optional[float] = None,
+        n_ticks_pull: Optional[float] = None,
         sigma: Optional[float] = None,
-        ax: Optional[mpl.axes.Axis] = None,
-        pull_ax: Optional[mpl.axes.Axis] = None,
-    ):
+        ax: Optional[mpl.axes.Axes] = None,
+        pull_ax: Optional[mpl.axes.Axes] = None,
+    ) -> Tuple[mpl.axes.Axes, mpl.axes.Axes]:
+        """
+        :param callback:
+            Callable used for the pull plot.
+        :param height_ratios:
+            Height ratio between the main plot and the pull plot.
+        :param color:
+            Color of bars and lines.
+        :param ecolor:
+            Color of errorbars and outliers.
+        :param title:
+            Title of the plot.
+        :param ylabel:
+            Label on the y-axis of the main plot.
+        :param figsize:
+            Size of the figure, including the pull plot.
+        :param grid:
+            Whether to show grid or not.
+        :param n_ticks:
+            Number of y-axis ticks to use.
+        :param n_ticks_pull:
+            Number of y-axis ticks to use in the pull plot.
+        :param sigma:
+        :param ax:
+            Optional ax where to plot the main plot.
+        :param pull_ax:
+            Optional ax where to plot the pull plot.
+        :return:
+        """
+
+        if sigma is not None and sigma < 0:
+            raise ValueError(f'Parameter `sigma` must be non-negative, found `{sigma}`.')
         # If ax and pull_ax are none, make a new figure and add the two axes with the proper ratio between them.
         # Otherwise, just use ax and pull_ax.
         if not callable(callback):
@@ -44,14 +75,14 @@ class Hist(BaseHist):
             )
 
         # Compute PDF values
-        values = callback(*self.axes.centers) * self.sum() * self.axes[0].widths
+        values = callback(self.axes[0].centers) * self.sum() * self.axes[0].widths
         yerr = np.sqrt(self.view())
 
         # Compute Pulls
         pulls = (self.view() - values) / yerr
 
         ax.errorbar(
-            self.axes.centers[0],
+            self.axes[0].centers,
             values,
             yerr=yerr,
             capsize=1,
@@ -68,13 +99,13 @@ class Hist(BaseHist):
         ax.set_title(title)
         ax.set_ylabel(ylabel)
         ax.xaxis.set_ticks_position("none")
-        ax.set_yticks(np.linspace(np.nanmin(values), np.nanmax(values), n_steps or 10))
+        ax.set_yticks(np.linspace(np.nanmin(values), np.nanmax(values), n_ticks or 10))
 
         pull_ax.set_ylabel("Pull")
         pull_ax.set_xlabel(self.axes[0].name)
 
         maxx = int(np.ceil(np.nanmax(np.abs(pulls))))
-        pull_ax.set_yticks(np.linspace(-maxx, maxx, n_steps_pull or 5))
+        pull_ax.set_yticks(np.linspace(-maxx, maxx, n_ticks_pull or 5))
 
         mean, sd = np.nanmean(pulls), np.nanstd(pulls)
 

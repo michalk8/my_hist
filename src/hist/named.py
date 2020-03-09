@@ -13,6 +13,9 @@ class NamedHist(Hist):
         self._axes_names_to_ixs = defaultdict(
             lambda: self._sentinel, {ax.name: ix for ix, ax in enumerate(self.axes)}
         )
+        duplicates = [name for name, count in Counter((a.name for a in self.axes)).items() if count > 1]
+        if duplicates:
+            raise ValueError(f'Following axis names are not unique: `{duplicates}`.')
         # ignore these keys when calling .fill
         self._fill_params_to_ignore = {
             k
