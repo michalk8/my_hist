@@ -57,7 +57,9 @@ class Hist(BaseHist):
         """
 
         if sigma is not None and sigma < 0:
-            raise ValueError(f'Parameter `sigma` must be non-negative, found `{sigma}`.')
+            raise ValueError(
+                f"Parameter `sigma` must be non-negative, found `{sigma}`."
+            )
         # If ax and pull_ax are none, make a new figure and add the two axes with the proper ratio between them.
         # Otherwise, just use ax and pull_ax.
         if not callable(callback):
