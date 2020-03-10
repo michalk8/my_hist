@@ -93,7 +93,7 @@ class Hist(BaseHist):
             fmt="-",
             capthick=2,
             elinewidth=2,
-            zorder=3,  # because of grid
+            zorder=3,  # see https://github.com/matplotlib/matplotlib/issues/5045
             linewidth=3,
         )
         ax.grid(grid, linestyle="--")
@@ -115,20 +115,20 @@ class Hist(BaseHist):
             outliers = (pulls > mean + sigma * sd) | (pulls <= mean - sigma * sd)
             colors = np.repeat(color, len(self.axes[0].centers))
             colors[outliers] = ecolor
-            pull_ax.hlines(
+            pull_ax.hlines(  # mean line
                 mean,
                 xmin=self.axes[0].centers[0],
                 xmax=self.axes[0].centers[-1],
                 color=color,
             )
-            pull_ax.hlines(
+            pull_ax.hlines(  # lower bound
                 mean - sigma * sd,
                 xmin=self.axes[0].centers[0],
                 xmax=self.axes[0].centers[-1],
                 linestyle="--",
                 color=color,
             )
-            pull_ax.hlines(
+            pull_ax.hlines(  # upper bound
                 mean + sigma * sd,
                 xmin=self.axes[0].centers[0],
                 xmax=self.axes[0].centers[-1],

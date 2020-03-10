@@ -10,16 +10,6 @@ class NamedHist(Hist):
 
     def __init__(self, *axes: axis, **kwargs):
         super().__init__(*axes, **kwargs)
-        self._axes_names_to_ixs = defaultdict(
-            lambda: self._sentinel, {ax.name: ix for ix, ax in enumerate(self.axes)}
-        )
-        duplicates = [
-            name
-            for name, count in Counter((a.name for a in self.axes)).items()
-            if count > 1
-        ]
-        if duplicates:
-            raise ValueError(f"Following axis names are not unique: `{duplicates}`.")
         # ignore these keys when calling .fill
         self._fill_params_to_ignore = {
             k
@@ -32,21 +22,32 @@ class NamedHist(Hist):
             if ax.name is None:
                 raise ValueError(f"{ix}. axis `{ax}` doesn't have a name.")
 
+        self._axes_names_to_ixs = defaultdict(
+            lambda: self._sentinel, {ax.name: ix for ix, ax in enumerate(self.axes)}
+        )
+        duplicates = [
+            name
+            for name, count in Counter((a.name for a in self.axes)).items()
+            if count > 1
+        ]
+        if duplicates:
+            raise ValueError(f"Following axis names are not unique: `{duplicates}`.")
+
     def fill(self, *args, **kwargs):
-        if len(args) != 0:
+        if len(args) != 0:  # we keep the args to retain the signature from the parent
             raise RuntimeError("Only keyword arguments are supported.")
         args = []
-        for k in list(kwargs.keys()):
-            if k not in self._fill_params_to_ignore:
-                if k not in self._axes_names_to_ixs:
+        for name in list(kwargs.keys()):
+            if name not in self._fill_params_to_ignore:  # user could have supplied weight, don't remove it
+                if name not in self._axes_names_to_ixs:
                     raise ValueError(
-                        f"Invalid axis name `{k}`. "
+                        f"Invalid axis name `{name}`. "
                         f"Valid options are: `{list(self._axes_names_to_ixs.keys())}`."
                     )
-                args.append((self._axes_names_to_ixs[k], kwargs.pop(k)))
+                args.append((self._axes_names_to_ixs[name], kwargs.pop(name)))
 
         args = tuple(
-            v for k, v in sorted(args, key=lambda kv: kv[0])
+            value for name, value in sorted(args, key=lambda name_value: name_value[0])
         )  # sort by axis indices
         return super().fill(*args, **kwargs)
 
